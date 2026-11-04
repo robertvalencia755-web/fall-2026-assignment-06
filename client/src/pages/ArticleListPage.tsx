@@ -3,8 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { fetchArticles } from '../api';
 import type { Article } from '../types';
 import { ArticleCard } from '../components/ArticleCard';
+import { ArticleDetailDrawer } from '../components/ArticleDetailDrawer';
+import { ArticleFormDrawer } from '../components/ArticleFormDrawer';
 
-export const ArticleListPage: React.FC = () => {
+interface ArticleListPageProps {
+  drawer?: 'detail' | 'create' | 'edit';
+}
+
+export const ArticleListPage: React.FC<ArticleListPageProps> = ({ drawer }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParam = searchParams.get('search') || '';
 
@@ -46,20 +52,39 @@ export const ArticleListPage: React.FC = () => {
     setSearchParams({});
   };
 
+  const handleArticleDeleted = (deletedId: number) => {
+    setArticles((prev) => prev.filter((a) => a.articleId !== deletedId));
+  };
+
+  const handleArticleSaved = (savedArticle: Article) => {
+    setArticles((prev) => {
+      const exists = prev.some((a) => a.articleId === savedArticle.articleId);
+      if (exists) {
+        return prev.map((a) =>
+          a.articleId === savedArticle.articleId ? savedArticle : a,
+        );
+      }
+      return [savedArticle, ...prev];
+    });
+  };
+
   return (
     <div className="page-container article-list-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Articles</h1>
-          <p className="page-subtitle">
-            Explore thoughts, guides, and engineering discussions.
+      {/* Hero Feed Banner */}
+      <div className="feed-banner">
+        <div className="feed-banner-content">
+          <div className="feed-badge">Knowledge Base & Articles</div>
+          <h1 className="feed-title">Developer Insights & Discussions</h1>
+          <p className="feed-subtitle">
+            Explore articles, write new insights, and join discussions in real time.
           </p>
         </div>
         <Link to="/articles/new" className="btn btn-primary create-article-btn">
-          + Create Article
+          ✨ + New Article
         </Link>
       </div>
 
+      {/* Search & Filter Bar */}
       <div className="search-section">
         <form onSubmit={handleSearchSubmit} className="search-form">
           <div className="search-input-wrapper">
@@ -89,6 +114,7 @@ export const ArticleListPage: React.FC = () => {
         </form>
       </div>
 
+      {/* Feed Status States */}
       {isLoading && (
         <div className="loading-state">
           <div className="spinner"></div>
@@ -116,7 +142,7 @@ export const ArticleListPage: React.FC = () => {
           <p>
             {queryParam
               ? `No articles matched your search for "${queryParam}".`
-              : 'There are no articles yet. Be the first to create one!'}
+              : 'There are no articles in the database yet.'}
           </p>
           {queryParam ? (
             <button
@@ -128,7 +154,7 @@ export const ArticleListPage: React.FC = () => {
             </button>
           ) : (
             <Link to="/articles/new" className="btn btn-primary">
-              Create an Article
+              Write the First Article
             </Link>
           )}
         </div>
@@ -140,6 +166,19 @@ export const ArticleListPage: React.FC = () => {
             <ArticleCard key={article.articleId} article={article} />
           ))}
         </div>
+      )}
+
+      {/* Slide-over Drawers */}
+      {drawer === 'detail' && (
+        <ArticleDetailDrawer onArticleDeleted={handleArticleDeleted} />
+      )}
+
+      {drawer === 'create' && (
+        <ArticleFormDrawer mode="create" onArticleSaved={handleArticleSaved} />
+      )}
+
+      {drawer === 'edit' && (
+        <ArticleFormDrawer mode="edit" onArticleSaved={handleArticleSaved} />
       )}
     </div>
   );

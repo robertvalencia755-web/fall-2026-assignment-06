@@ -2,9 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { ArticleListPage } from './pages/ArticleListPage';
-import { ArticleDetailPage } from './pages/ArticleDetailPage';
-import { CreateArticlePage } from './pages/CreateArticlePage';
-import { EditArticlePage } from './pages/EditArticlePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import './App.css';
 
@@ -17,9 +14,9 @@ export const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<ArticleListPage />} />
             <Route path="/articles" element={<Navigate to="/" replace />} />
-            <Route path="/articles/new" element={<CreateArticlePage />} />
-            <Route path="/articles/:articleId" element={<ArticleDetailPage />} />
-            <Route path="/articles/:articleId/edit" element={<EditArticlePage />} />
+            <Route path="/articles/new" element={<ArticleListPage drawer="create" />} />
+            <Route path="/articles/:articleId" element={<ArticleListPage drawer="detail" />} />
+            <Route path="/articles/:articleId/edit" element={<ArticleListPage drawer="edit" />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
